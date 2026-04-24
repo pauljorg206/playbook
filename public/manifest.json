@@ -1,0 +1,37 @@
+{
+  "name": "Playbook — Youth Basketball",
+  "short_name": "Playbook",
+  "description": "Animated basketball plays for coaches and players",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "education"],
+  "shortcuts": [
+    {
+      "name": "Practice Plan",
+      "url": "/practice",
+      "description": "Build today's practice plan"
+    },
+    {
+      "name": "Offense",
+      "url": "/plays/offense",
+      "description": "Half-court offense plays"
+    }
+  ]
+}

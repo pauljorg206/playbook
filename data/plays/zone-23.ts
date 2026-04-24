@@ -1,0 +1,157 @@
+import { Play } from "@/lib/types";
+
+const play: Play = {
+  id: "zone-23",
+  name: "2-3 Zone Defense",
+  shortName: "2-3 Zone",
+  category: "defense",
+  description:
+    "The 2-3 zone. Two guards up top, three across the baseline. Protect the paint, force outside shots, and rotate to close out shooters.",
+  courtType: "half",
+  steps: [
+    {
+      description:
+        "Base 2-3 alignment. Guards D1 and D2 at the top — cover the wings and passing lanes. Baseline players D3, D4, D5 protect the paint and low blocks. Nobody sags too deep.",
+      players: [
+        { id: "d1", x: 35, y: 45, label: "D1", role: "defense" },
+        { id: "d2", x: 65, y: 45, label: "D2", role: "defense" },
+        { id: "d3", x: 18, y: 70, label: "D3", role: "defense" },
+        { id: "d4", x: 50, y: 73, label: "D4", role: "defense" },
+        { id: "d5", x: 82, y: 70, label: "D5", role: "defense" },
+        { id: "p1", x: 50, y: 42, label: "1", role: "offense", hasBall: true },
+        { id: "p2", x: 18, y: 60, label: "2", role: "offense" },
+        { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
+        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
+        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+      ],
+      movements: [],
+    },
+    {
+      description:
+        "Ball goes to the wing (2). D2 slides hard to close out on 2. D4 (middle) slides toward the ball side. D3 (ball-side baseline) drops to protect the block. D1 drops to the elbow.",
+      players: [
+        { id: "d1", x: 35, y: 53, label: "D1", role: "defense" },
+        { id: "d2", x: 22, y: 58, label: "D2", role: "defense" },
+        { id: "d3", x: 18, y: 73, label: "D3", role: "defense" },
+        { id: "d4", x: 40, y: 73, label: "D4", role: "defense" },
+        { id: "d5", x: 75, y: 72, label: "D5", role: "defense" },
+        { id: "p1", x: 50, y: 42, label: "1", role: "offense" },
+        { id: "p2", x: 18, y: 60, label: "2", role: "offense", hasBall: true },
+        { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
+        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
+        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+      ],
+      movements: [
+        {
+          playerId: "d2",
+          fromX: 65,
+          fromY: 45,
+          toX: 22,
+          toY: 58,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d1",
+          fromX: 35,
+          fromY: 45,
+          toX: 35,
+          toY: 53,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d4",
+          fromX: 50,
+          fromY: 73,
+          toX: 40,
+          toY: 73,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d3",
+          fromX: 18,
+          fromY: 70,
+          toX: 18,
+          toY: 73,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d5",
+          fromX: 82,
+          fromY: 70,
+          toX: 75,
+          toY: 72,
+          type: "cut",
+          curved: false,
+        },
+      ],
+    },
+    {
+      description:
+        "Ball swings to the corner (4). D3 closes out hard on the corner. D4 drops to the block protecting the basket. D2 recovers to the elbow. This is why the short corner is tough to guard!",
+      players: [
+        { id: "d1", x: 35, y: 53, label: "D1", role: "defense" },
+        { id: "d2", x: 35, y: 60, label: "D2", role: "defense" },
+        { id: "d3", x: 18, y: 80, label: "D3", role: "defense" },
+        { id: "d4", x: 40, y: 80, label: "D4", role: "defense" },
+        { id: "d5", x: 75, y: 72, label: "D5", role: "defense" },
+        { id: "p1", x: 50, y: 42, label: "1", role: "offense" },
+        { id: "p2", x: 18, y: 60, label: "2", role: "offense" },
+        { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
+        { id: "p4", x: 8, y: 83, label: "4", role: "offense", hasBall: true },
+        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+      ],
+      movements: [
+        {
+          playerId: "d3",
+          fromX: 18,
+          fromY: 73,
+          toX: 18,
+          toY: 80,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d4",
+          fromX: 40,
+          fromY: 73,
+          toX: 40,
+          toY: 80,
+          type: "cut",
+          curved: false,
+        },
+        {
+          playerId: "d2",
+          fromX: 22,
+          fromY: 58,
+          toX: 35,
+          toY: 60,
+          type: "cut",
+          curved: false,
+        },
+      ],
+    },
+    {
+      description:
+        "Rebounding responsibilities. When a shot goes up — D3 and D5 box out the low posts, D4 boxes out the middle, D1 and D2 crash from the top or find guards to box out. Block out FIRST, then go get the ball!",
+      players: [
+        { id: "d1", x: 35, y: 53, label: "D1", role: "defense" },
+        { id: "d2", x: 65, y: 53, label: "D2", role: "defense" },
+        { id: "d3", x: 18, y: 78, label: "D3", role: "defense" },
+        { id: "d4", x: 50, y: 73, label: "D4", role: "defense" },
+        { id: "d5", x: 82, y: 78, label: "D5", role: "defense" },
+        { id: "p1", x: 50, y: 42, label: "1", role: "offense" },
+        { id: "p2", x: 18, y: 60, label: "2", role: "offense" },
+        { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
+        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
+        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+      ],
+      movements: [],
+    },
+  ],
+};
+
+export default play;
