@@ -13,7 +13,7 @@ const play: Play = {
       description:
         "Formation: PG (1) at top of key. Wings (2) and (3) at the wings. Posts (4) and (5) at the elbows. Spread and spaced.",
       players: [
-        { id: "p1", x: 50, y: 48, label: "1", role: "offense", hasBall: true },
+        { id: "p1", x: 50, y: 35, label: "1", role: "offense", hasBall: true },
         { id: "p2", x: 18, y: 60, label: "2", role: "offense" },
         { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 36, y: 63, label: "4", role: "offense" },
@@ -25,7 +25,7 @@ const play: Play = {
       description:
         "Step 1: PG (1) passes to the wing (2). Ball goes to the left wing.",
       players: [
-        { id: "p1", x: 50, y: 48, label: "1", role: "offense", hasBall: true },
+        { id: "p1", x: 50, y: 35, label: "1", role: "offense", hasBall: true },
         { id: "p2", x: 18, y: 60, label: "2", role: "offense" },
         { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 36, y: 63, label: "4", role: "offense" },
@@ -35,7 +35,7 @@ const play: Play = {
         {
           playerId: "p1",
           fromX: 50,
-          fromY: 48,
+          fromY: 35,
           toX: 18,
           toY: 60,
           type: "pass",
@@ -47,7 +47,7 @@ const play: Play = {
       description:
         "Step 2: PG (1) cuts hard through the lane, rubbing off the ball-side elbow (4). Player 2 looks for the quick layup pass to 1 cutting.",
       players: [
-        { id: "p1", x: 50, y: 48, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 35, label: "1", role: "offense" },
         { id: "p2", x: 18, y: 60, label: "2", role: "offense", hasBall: true },
         { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 36, y: 63, label: "4", role: "offense" },
@@ -57,7 +57,7 @@ const play: Play = {
         {
           playerId: "p1",
           fromX: 50,
-          fromY: 48,
+          fromY: 35,
           toX: 40,
           toY: 78,
           type: "cut",
@@ -136,7 +136,7 @@ const play: Play = {
           fromX: 40,
           fromY: 78,
           toX: 50,
-          toY: 48,
+          toY: 35,
           type: "cut",
           curved: true,
           controlX: 62,
@@ -152,7 +152,7 @@ const play: Play = {
       description:
         "Step 5: PG (1) pops to the top of the key for a three-pointer off the staggered screen. Player 2 swings the ball — kick-out pass to 1 for the three!",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 35, label: "1", role: "offense" },
         { id: "p2", x: 35, y: 65, label: "2", role: "offense", hasBall: true },
         { id: "p3", x: 75, y: 58, label: "3", role: "offense" },
         { id: "p4", x: 42, y: 80, label: "4", role: "offense" },
@@ -164,7 +164,7 @@ const play: Play = {
           fromX: 35,
           fromY: 65,
           toX: 50,
-          toY: 45,
+          toY: 35,
           type: "pass",
           curved: false,
         },
@@ -174,7 +174,7 @@ const play: Play = {
       description:
         "Step 6: Weak-side wing (3) pops out to the wing. Post (5) slides to the short corner. Ball reversal options — feed inside to 4 or 5, or reset to run again.",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense", hasBall: true },
+        { id: "p1", x: 50, y: 35, label: "1", role: "offense", hasBall: true },
         { id: "p2", x: 35, y: 65, label: "2", role: "offense" },
         { id: "p3", x: 82, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 42, y: 80, label: "4", role: "offense" },
@@ -202,7 +202,7 @@ const play: Play = {
         {
           playerId: "p1",
           fromX: 50,
-          fromY: 45,
+          fromY: 35,
           toX: 82,
           toY: 60,
           type: "pass",

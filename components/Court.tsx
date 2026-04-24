@@ -131,9 +131,9 @@ export default function Court({ children }: { children?: React.ReactNode }) {
       />
       <circle cx={250} cy={432} r={3} fill="#e05a00" />
 
-      {/* Three-point line arc */}
+      {/* Three-point line arc — HS style pure arc centered on basket */}
       <path
-        d="M 36 450 L 36 355 A 218 218 0 0 1 464 355 L 464 450"
+        d="M 34 460 A 218 218 0 0 0 466 460"
         fill="none"
         stroke="#c8a96e"
         strokeWidth={2}
