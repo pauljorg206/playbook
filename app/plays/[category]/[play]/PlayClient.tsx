@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Play, CategoryMeta } from "@/lib/types";
 import PlayAnimation from "@/components/PlayAnimation";
 import PlayControls from "@/components/PlayControls";
@@ -17,19 +16,19 @@ interface PlayClientProps {
 }
 
 export default function PlayClient({ play, category }: PlayClientProps) {
-  const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [loop, setLoop] = useState(false);
   const [coachingMode, setCoachingMode] = useState(false);
   const [drawing, setDrawing] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [relatedOpen, setRelatedOpen] = useState(false);
   const [roster, setRoster] = useState<
     Record<string, { name: string; number: string }>
   >({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load roster from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("playbook-roster");
@@ -37,10 +36,10 @@ export default function PlayClient({ play, category }: PlayClientProps) {
     } catch {}
   }, []);
 
-  // Reset step when play changes
   useEffect(() => {
     setStepIndex(0);
     setIsPlaying(false);
+    setDescExpanded(false);
   }, [play.id]);
 
   const goNext = useCallback(() => {
@@ -56,7 +55,6 @@ export default function PlayClient({ play, category }: PlayClientProps) {
     setStepIndex((i) => Math.max(0, i - 1));
   }, []);
 
-  // Auto-play timer
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!isPlaying) return;
@@ -67,14 +65,15 @@ export default function PlayClient({ play, category }: PlayClientProps) {
     };
   }, [isPlaying, speed, goNext]);
 
-  // Share
   const handleShare = useCallback(async () => {
     const url = window.location.href;
     try {
       await navigator.share({ title: play.name, text: play.description, url });
     } catch {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied!");
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("Link copied!");
+      } catch {}
     }
   }, [play]);
 
@@ -85,51 +84,47 @@ export default function PlayClient({ play, category }: PlayClientProps) {
     (p) => p.category === play.category && p.id !== play.id,
   ).slice(0, 3);
 
+  // ─── Coaching mode ────────────────────────────────────────────────
   if (coachingMode) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col">
-        {/* Coaching header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-black/80 shrink-0">
-          <div>
+        <div className="flex items-center justify-between px-4 py-3 bg-black/90 shrink-0 gap-3">
+          <div className="min-w-0">
             <div
               className={`text-xs font-bold uppercase tracking-widest ${category?.color ?? "text-gray-400"}`}
             >
               {category?.icon} {category?.label}
             </div>
-            <h1 className="text-white font-black text-2xl leading-tight">
+            <h1 className="text-white font-black text-xl leading-tight truncate">
               {play.name}
             </h1>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 shrink-0">
             <button
               onClick={() => setDrawing((d) => !d)}
-              className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors ${drawing ? "bg-orange-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"}`}
+              className={`px-3 py-2 rounded-xl font-bold text-sm transition-colors ${drawing ? "bg-orange-600 text-white" : "bg-gray-800 text-gray-300"}`}
             >
-              ✏️ {drawing ? "Hide Draw" : "Draw"}
+              ✏️ Draw
             </button>
             <button
               onClick={() => {
                 setCoachingMode(false);
                 setDrawing(false);
               }}
-              className="px-4 py-2 rounded-xl font-bold text-sm bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+              className="px-3 py-2 rounded-xl font-bold text-sm bg-gray-800 text-gray-300 transition-colors"
             >
-              ✕ Exit
+              ✕
             </button>
           </div>
         </div>
 
-        {/* Court — fills remaining space */}
-        <div className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center p-2">
-            <div
-              className="relative w-full h-full max-h-full"
-              style={{ aspectRatio: `${courtW}/${courtH}` }}
-            >
+        <div className="flex-1 min-h-0 relative overflow-hidden bg-black">
+          <div className="absolute inset-0 p-1 flex items-center justify-center">
+            <div className="relative w-full h-full">
               <PlayAnimation
                 play={play}
                 stepIndex={stepIndex}
-                showGhosts={true}
+                showGhosts
                 roster={roster}
               />
               {drawing && (
@@ -143,7 +138,6 @@ export default function PlayClient({ play, category }: PlayClientProps) {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="shrink-0">
           <PlayControls
             play={play}
@@ -151,7 +145,7 @@ export default function PlayClient({ play, category }: PlayClientProps) {
             isPlaying={isPlaying}
             speed={speed}
             loop={loop}
-            coachingMode={true}
+            coachingMode
             onPrev={goPrev}
             onNext={goNext}
             onPlayPause={() => setIsPlaying((p) => !p)}
@@ -163,58 +157,70 @@ export default function PlayClient({ play, category }: PlayClientProps) {
     );
   }
 
+  // ─── Normal mode ──────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-4 pt-6 pb-3 border-b border-gray-800/60">
-        <div
-          className={`text-xs font-bold uppercase tracking-widest mb-1 ${category?.color ?? "text-gray-400"}`}
-        >
-          {category?.icon} {category?.label}
-        </div>
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-2xl md:text-3xl font-black text-white leading-tight">
-            {play.name}
-          </h1>
-          <div className="flex gap-2 shrink-0 mt-0.5">
+    // pb-16 md:pb-0 keeps content above the fixed mobile bottom nav
+    <div className="flex flex-col pb-16 md:pb-0" style={{ height: "100dvh" }}>
+      {/* ── Header — compact on mobile ── */}
+      <div className="shrink-0 px-3 pt-3 pb-2 border-b border-gray-800/60">
+        {/* Row 1: category + action buttons */}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <span
+            className={`text-[10px] font-bold uppercase tracking-widest ${category?.color ?? "text-gray-400"}`}
+          >
+            {category?.icon} {category?.label}
+          </span>
+          <div className="flex gap-1.5 shrink-0">
             <button
               onClick={handleShare}
-              className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors"
+              className="px-2.5 py-1 text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors"
             >
               🔗 Share
             </button>
             <button
               onClick={() => setCoachingMode(true)}
-              className="px-3 py-1.5 text-xs bg-orange-700 hover:bg-orange-600 text-white rounded-lg font-bold transition-colors"
+              className="px-2.5 py-1 text-[11px] bg-orange-700 hover:bg-orange-600 text-white rounded-lg font-bold transition-colors"
             >
               📋 Coach
             </button>
           </div>
         </div>
-        <p className="text-gray-400 text-sm mt-1.5 leading-snug">
-          {play.description}
-        </p>
+
+        {/* Row 2: play name */}
+        <h1 className="text-lg md:text-2xl font-black text-white leading-tight">
+          {play.name}
+        </h1>
+
+        {/* Row 3: description — collapsible on mobile */}
+        <div className="mt-1">
+          <p
+            className={`text-gray-400 text-xs md:text-sm leading-snug ${descExpanded ? "" : "line-clamp-1 md:line-clamp-none"}`}
+          >
+            {play.description}
+          </p>
+          <button
+            onClick={() => setDescExpanded((v) => !v)}
+            className="text-[10px] text-blue-400 font-semibold mt-0.5 md:hidden"
+          >
+            {descExpanded ? "Less ↑" : "More ↓"}
+          </button>
+        </div>
       </div>
 
-      {/* Court */}
-      <div className="flex-1 relative bg-gray-950 flex items-center justify-center p-3 min-h-0">
-        <div
-          className="relative w-full"
-          style={{
-            maxHeight: "calc(100vh - 340px)",
-            aspectRatio: `${courtW}/${courtH}`,
-          }}
-        >
+      {/* ── Court — flex-1, takes all remaining space ── */}
+      {/* absolute inset-0 child ensures reliable height propagation to SVG */}
+      <div className="flex-1 min-h-0 relative bg-gray-950">
+        <div className="absolute inset-0 p-2 flex items-center justify-center">
           <PlayAnimation
             play={play}
             stepIndex={stepIndex}
-            showGhosts={true}
+            showGhosts
             roster={roster}
           />
         </div>
       </div>
 
-      {/* Controls */}
+      {/* ── Controls ── */}
       <div className="shrink-0">
         <PlayControls
           play={play}
@@ -231,16 +237,30 @@ export default function PlayClient({ play, category }: PlayClientProps) {
         />
       </div>
 
-      {/* Related plays */}
+      {/* ── Related plays — desktop only, mobile behind toggle ── */}
       {relatedPlays.length > 0 && (
-        <div className="px-4 py-5 border-t border-gray-800/60">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
-            More in {category?.label}
-          </h3>
-          <div className="flex flex-col gap-2">
-            {relatedPlays.map((p) => (
-              <PlayCard key={p.id} play={p} compact />
-            ))}
+        <div className="shrink-0 border-t border-gray-800/60">
+          {/* Mobile: collapsible toggle */}
+          <button
+            onClick={() => setRelatedOpen((v) => !v)}
+            className="md:hidden w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-widest"
+          >
+            <span>More in {category?.label}</span>
+            <span>{relatedOpen ? "▲" : "▼"}</span>
+          </button>
+
+          {/* Desktop: always visible; Mobile: only when open */}
+          <div
+            className={`px-3 pb-3 ${relatedOpen ? "block" : "hidden"} md:block`}
+          >
+            <p className="hidden md:block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 pt-3">
+              More in {category?.label}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {relatedPlays.map((p) => (
+                <PlayCard key={p.id} play={p} compact />
+              ))}
+            </div>
           </div>
         </div>
       )}
