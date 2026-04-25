@@ -13,7 +13,7 @@ const play: Play = {
       description:
         "Set up in a 1-3-1 overload. PG (1) at the top. Wing (2) on the strong side. Post (5) at the high post. Wing (3) at the weak side. Post (4) in the short corner — the gap under the 2-3 zone.",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense", hasBall: true },
+        { id: "p1", x: 50, y: 47, label: "1", role: "offense", hasBall: true },
         { id: "p2", x: 20, y: 60, label: "2", role: "offense" },
         { id: "p3", x: 80, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 10, y: 89, label: "4", role: "offense" },
@@ -30,7 +30,7 @@ const play: Play = {
       description:
         "Step 1: PG (1) passes to strong-side wing (2). The zone shifts left. High post (5) flashes to the ball-side elbow, splitting the seam between the two top defenders.",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 47, label: "1", role: "offense" },
         { id: "p2", x: 20, y: 60, label: "2", role: "offense", hasBall: true },
         { id: "p3", x: 80, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 10, y: 89, label: "4", role: "offense" },
@@ -65,7 +65,7 @@ const play: Play = {
       description:
         "Step 2: Short corner attack! Wing (2) passes down to short corner (4). Defender D3 must choose — guard 4 or guard 2. Post (5) seals the middle defender for a high-low pass.",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 47, label: "1", role: "offense" },
         { id: "p2", x: 20, y: 60, label: "2", role: "offense", hasBall: true },
         { id: "p3", x: 80, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 10, y: 89, label: "4", role: "offense" },
@@ -91,7 +91,7 @@ const play: Play = {
       description:
         "Step 3: Skip pass! If the zone collapses on the short corner, (4) or (2) makes a long skip pass across to the weak-side wing (3). Zone can't recover — open three!",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 47, label: "1", role: "offense" },
         { id: "p2", x: 20, y: 60, label: "2", role: "offense" },
         { id: "p3", x: 80, y: 60, label: "3", role: "offense" },
         { id: "p4", x: 10, y: 89, label: "4", role: "offense", hasBall: true },
@@ -120,7 +120,7 @@ const play: Play = {
       description:
         "Step 4: High-low action. Ball at weak side (3). High post (5) is at the elbow — open in the gap. Pass to 5. Then 5 looks high-low to (4) posting up at the block. 2-on-1 inside!",
       players: [
-        { id: "p1", x: 50, y: 45, label: "1", role: "offense" },
+        { id: "p1", x: 50, y: 47, label: "1", role: "offense" },
         { id: "p2", x: 20, y: 60, label: "2", role: "offense" },
         { id: "p3", x: 80, y: 60, label: "3", role: "offense", hasBall: true },
         { id: "p4", x: 60, y: 80, label: "4", role: "offense" },
