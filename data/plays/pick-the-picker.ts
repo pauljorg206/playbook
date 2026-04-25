@@ -1,160 +1,137 @@
 import { Play } from "@/lib/types";
 
+// Box set BLOB: posts on the low blocks, wings at the elbows. Inbounder on the
+// left side of the lane, just out of bounds.
+//
+// Coord notes (new NBA geometry):
+//   Low blocks:  (34, 87) / (66, 87)    Elbows: (38, 56) / (62, 56)
+//   Second hash above block (screen): y≈83. First hash above: y≈70.
+
 const play: Play = {
   id: "pick-the-picker",
   name: "Pick the Picker",
   shortName: "Pick the Picker",
   category: "out-of-bounds",
   description:
-    "Baseline out of bounds box set. Posts (4, 5) on the low blocks. Wings (2, 3) at the elbows. 5 screens up for 3, then 2 and 4 pick the picker (double screen for 5).",
+    "Baseline out-of-bounds box set. (5) screens up for (3) on the wing. Then (2) and (4) pick the picker — double-screen for (5) curling to the elbow. Multiple looks built in.",
   courtType: "half",
   steps: [
+    // Formation
     {
       description:
-        "Box set formation. Player 1 (inbounder) is out of bounds on the left side of the key. Posts 4 and 5 on the low blocks. Wings 2 and 3 at the elbows.",
+        "Box set. (1) inbounder out of bounds on the left side of the lane. Posts (4, 5) on the low blocks. Wings (2, 3) at the elbows.",
       players: [
-        {
-          id: "p1",
-          x: 30,
-          y: 97,
-          label: "1",
-          role: "inbounder",
-          hasBall: true,
-        },
-        { id: "p2", x: 36, y: 63, label: "2", role: "offense" },
-        { id: "p3", x: 64, y: 63, label: "3", role: "offense" },
-        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
-        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+        { id: "p1", x: 30, y: 99, label: "1", role: "inbounder", hasBall: true },
+        { id: "p2", x: 38, y: 56, label: "2", role: "offense" },
+        { id: "p3", x: 62, y: 56, label: "3", role: "offense" },
+        { id: "p4", x: 34, y: 87, label: "4", role: "offense" },
+        { id: "p5", x: 66, y: 87, label: "5", role: "offense" },
       ],
       movements: [],
     },
+
+    // 1: 5 screens up for 3
     {
       description:
-        "Step 1: Post (5) screens UP for wing (3). 5 moves from the right low block up to set a screen on 3's defender. Player 3 uses the screen and cuts hard toward the right wing for the inbound pass.",
+        "First action. (5) flashes up to the second hash and screens up for (3). (3) reads the screen and sprints to the right wing for the inbound.",
       players: [
-        {
-          id: "p1",
-          x: 30,
-          y: 97,
-          label: "1",
-          role: "inbounder",
-          hasBall: true,
-        },
-        { id: "p2", x: 36, y: 63, label: "2", role: "offense" },
-        { id: "p3", x: 64, y: 63, label: "3", role: "offense" },
-        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
-        { id: "p5", x: 62, y: 80, label: "5", role: "offense" },
+        { id: "p1", x: 30, y: 99, label: "1", role: "inbounder", hasBall: true },
+        { id: "p2", x: 38, y: 56, label: "2", role: "offense" },
+        { id: "p3", x: 85, y: 65, label: "3", role: "offense" },
+        { id: "p4", x: 34, y: 87, label: "4", role: "offense" },
+        { id: "p5", x: 66, y: 70, label: "5", role: "offense" },
       ],
       movements: [
         {
           playerId: "p5",
-          fromX: 62,
-          fromY: 80,
-          toX: 62,
-          toY: 67,
+          fromX: 66,
+          fromY: 87,
+          toX: 66,
+          toY: 70,
           type: "screen",
           curved: false,
         },
         {
           playerId: "p3",
-          fromX: 64,
-          fromY: 63,
-          toX: 82,
-          toY: 68,
+          fromX: 62,
+          fromY: 56,
+          toX: 85,
+          toY: 65,
           type: "cut",
           curved: true,
-          controlX: 75,
-          controlY: 60,
+          controlX: 78,
+          controlY: 58,
         },
       ],
-      screens: [{ screenerId: "p5", x: 62, y: 67, angle: 0 }],
+      screens: [{ screenerId: "p5", x: 66, y: 70, angle: 0 }],
     },
+
+    // 2: 2 and 4 pick the picker — double screen for 5
     {
       description:
-        "Step 2: 'Pick the Picker' — 2 and 4 set a double screen for 5 (the original screener). 5 uses the double screen and pops to the ball-side elbow or mid-range area for a catch and shoot.",
+        "Pick the picker. (2) sprints down from the elbow and (4) lifts from the block — they form a double screen on the nail. (5) — the original screener — curls hard around them to the middle of the floor.",
       players: [
-        {
-          id: "p1",
-          x: 30,
-          y: 97,
-          label: "1",
-          role: "inbounder",
-          hasBall: true,
-        },
-        { id: "p2", x: 36, y: 63, label: "2", role: "offense" },
-        { id: "p3", x: 82, y: 68, label: "3", role: "offense" },
-        { id: "p4", x: 38, y: 80, label: "4", role: "offense" },
-        { id: "p5", x: 62, y: 67, label: "5", role: "offense" },
+        { id: "p1", x: 30, y: 99, label: "1", role: "inbounder", hasBall: true },
+        { id: "p2", x: 46, y: 70, label: "2", role: "offense" },
+        { id: "p3", x: 85, y: 65, label: "3", role: "offense" },
+        { id: "p4", x: 54, y: 70, label: "4", role: "offense" },
+        { id: "p5", x: 50, y: 56, label: "5", role: "offense" },
       ],
       movements: [
         {
           playerId: "p2",
-          fromX: 36,
-          fromY: 63,
+          fromX: 38,
+          fromY: 56,
           toX: 46,
-          toY: 73,
-          type: "cut",
+          toY: 70,
+          type: "screen",
           curved: false,
         },
         {
           playerId: "p4",
-          fromX: 38,
-          fromY: 80,
-          toX: 52,
-          toY: 73,
-          type: "cut",
+          fromX: 34,
+          fromY: 87,
+          toX: 54,
+          toY: 70,
+          type: "screen",
           curved: false,
         },
         {
           playerId: "p5",
-          fromX: 62,
-          fromY: 67,
-          toX: 45,
-          toY: 55,
+          fromX: 66,
+          fromY: 70,
+          toX: 50,
+          toY: 56,
           type: "cut",
           curved: true,
-          controlX: 55,
-          controlY: 58,
+          controlX: 58,
+          controlY: 60,
         },
       ],
       screens: [
-        { screenerId: "p2", x: 46, y: 73, angle: 90 },
-        { screenerId: "p4", x: 52, y: 73, angle: 90 },
+        { screenerId: "p2", x: 46, y: 70, angle: 90 },
+        { screenerId: "p4", x: 54, y: 70, angle: 90 },
       ],
     },
+
+    // 3: read & inbound
     {
       description:
-        "Step 3 — Options: 1st choice: 3 open at the right wing off the first screen. 2nd choice: 5 open at the elbow off the double screen. 3rd choice: kick to 2 or 4 who step out after setting their screens.",
+        "Read the defense. 1st look: (3) on the right wing off the up-screen. 2nd look: (5) at the elbow off the double. 3rd look: (4) or (2) slip after setting the screen. Pick the open one and inbound.",
       players: [
-        {
-          id: "p1",
-          x: 30,
-          y: 97,
-          label: "1",
-          role: "inbounder",
-          hasBall: true,
-        },
-        { id: "p2", x: 46, y: 73, label: "2", role: "offense" },
-        { id: "p3", x: 82, y: 68, label: "3", role: "offense" },
-        { id: "p4", x: 52, y: 73, label: "4", role: "offense" },
-        { id: "p5", x: 45, y: 55, label: "5", role: "offense" },
+        { id: "p1", x: 30, y: 99, label: "1", role: "inbounder", hasBall: true },
+        { id: "p2", x: 46, y: 70, label: "2", role: "offense" },
+        { id: "p3", x: 85, y: 65, label: "3", role: "offense" },
+        { id: "p4", x: 54, y: 70, label: "4", role: "offense" },
+        { id: "p5", x: 50, y: 56, label: "5", role: "offense" },
       ],
       movements: [
         {
           playerId: "p1",
           fromX: 30,
-          fromY: 97,
-          toX: 82,
-          toY: 68,
-          type: "pass",
-          curved: false,
-        },
-        {
-          playerId: "p1",
-          fromX: 30,
-          fromY: 97,
-          toX: 45,
-          toY: 55,
+          fromY: 99,
+          toX: 50,
+          toY: 56,
           type: "pass",
           curved: false,
         },

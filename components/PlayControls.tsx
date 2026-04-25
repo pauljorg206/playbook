@@ -5,6 +5,8 @@ import { Play } from "@/lib/types";
 interface PlayControlsProps {
   play: Play;
   stepIndex: number;
+  /** 0-1 across the full play (steps + within-step progress) */
+  totalProgress?: number;
   isPlaying: boolean;
   speed: number;
   loop: boolean;
@@ -22,6 +24,7 @@ const SPEEDS = [0.5, 1, 1.5, 2];
 export default function PlayControls({
   play,
   stepIndex,
+  totalProgress,
   isPlaying,
   speed,
   loop,
@@ -34,7 +37,10 @@ export default function PlayControls({
   onCoachingMode,
 }: PlayControlsProps) {
   const total = play.steps.length;
-  const progress = ((stepIndex + 1) / total) * 100;
+  const progressPct =
+    totalProgress !== undefined
+      ? Math.max(0, Math.min(1, totalProgress)) * 100
+      : ((stepIndex + 1) / total) * 100;
 
   if (coachingMode) {
     return (
@@ -45,7 +51,7 @@ export default function PlayControls({
         <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${progressPct}%` }}
           />
         </div>
         <div className="flex items-center justify-between gap-4">
@@ -111,7 +117,7 @@ export default function PlayControls({
         <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${progressPct}%` }}
           />
         </div>
         <span className="text-gray-500 font-mono text-[10px] tabular-nums shrink-0">

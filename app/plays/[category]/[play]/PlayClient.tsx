@@ -15,8 +15,12 @@ interface PlayClientProps {
   category?: CategoryMeta;
 }
 
+// Slower, cinematic step duration — the user wants slo-mo flow.
+const BASE_STEP_MS = 3200;
+
 export default function PlayClient({ play, category }: PlayClientProps) {
   const [stepIndex, setStepIndex] = useState(0);
+  const [progress, setProgress] = useState(0); // 0-1 within the current step
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [loop, setLoop] = useState(false);
@@ -27,7 +31,9 @@ export default function PlayClient({ play, category }: PlayClientProps) {
   const [roster, setRoster] = useState<
     Record<string, { name: string; number: string }>
   >({});
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const rafRef = useRef<number | null>(null);
+  const lastTickRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -38,32 +44,83 @@ export default function PlayClient({ play, category }: PlayClientProps) {
 
   useEffect(() => {
     setStepIndex(0);
+    setProgress(0);
     setIsPlaying(false);
     setDescExpanded(false);
   }, [play.id]);
 
+  // ─── rAF timeline ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isPlaying) {
+      lastTickRef.current = null;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      return;
+    }
+    const tick = (now: number) => {
+      const last = lastTickRef.current ?? now;
+      const dt = now - last;
+      lastTickRef.current = now;
+      const stepMs = BASE_STEP_MS / speed;
+      setProgress((prev) => {
+        const next = prev + dt / stepMs;
+        if (next >= 1) {
+          // advance to next step (or stop / loop)
+          setStepIndex((idx) => {
+            if (idx + 1 < play.steps.length) return idx + 1;
+            if (loop) return 0;
+            // end of play
+            setIsPlaying(false);
+            return idx;
+          });
+          return 0;
+        }
+        return next;
+      });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      lastTickRef.current = null;
+    };
+  }, [isPlaying, speed, loop, play.steps.length]);
+
+  // Snap progress to 1 when paused at a step we already navigated to via prev/next
+  // (so the diagram shows the "after" frame)
   const goNext = useCallback(() => {
+    setIsPlaying(false);
     setStepIndex((i) => {
-      if (i < play.steps.length - 1) return i + 1;
-      if (loop) return 0;
-      setIsPlaying(false);
+      if (i < play.steps.length - 1) {
+        setProgress(1);
+        return i + 1;
+      }
       return i;
     });
-  }, [play.steps.length, loop]);
+    setProgress(1);
+  }, [play.steps.length]);
 
   const goPrev = useCallback(() => {
+    setIsPlaying(false);
     setStepIndex((i) => Math.max(0, i - 1));
+    setProgress(1);
   }, []);
 
-  useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (!isPlaying) return;
-    const delay = 1800 / speed;
-    intervalRef.current = setInterval(goNext, delay);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isPlaying, speed, goNext]);
+  const onPlayPause = useCallback(() => {
+    setIsPlaying((p) => {
+      if (!p) {
+        // when starting from the end, restart from step 0
+        if (stepIndex >= play.steps.length - 1 && progress >= 1) {
+          setStepIndex(0);
+          setProgress(0);
+        }
+        // if at static "after" state of a step, restart it for the animation
+        if (progress >= 1) setProgress(0);
+      }
+      return !p;
+    });
+  }, [stepIndex, progress, play.steps.length]);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
@@ -83,6 +140,9 @@ export default function PlayClient({ play, category }: PlayClientProps) {
   const relatedPlays = ALL_PLAYS.filter(
     (p) => p.category === play.category && p.id !== play.id,
   ).slice(0, 3);
+
+  const totalProgress =
+    (stepIndex + Math.min(1, progress)) / play.steps.length;
 
   // ─── Coaching mode ────────────────────────────────────────────────
   if (coachingMode) {
@@ -124,6 +184,7 @@ export default function PlayClient({ play, category }: PlayClientProps) {
               <PlayAnimation
                 play={play}
                 stepIndex={stepIndex}
+                progress={progress}
                 showGhosts
                 roster={roster}
               />
@@ -142,13 +203,14 @@ export default function PlayClient({ play, category }: PlayClientProps) {
           <PlayControls
             play={play}
             stepIndex={stepIndex}
+            totalProgress={totalProgress}
             isPlaying={isPlaying}
             speed={speed}
             loop={loop}
             coachingMode
             onPrev={goPrev}
             onNext={goNext}
-            onPlayPause={() => setIsPlaying((p) => !p)}
+            onPlayPause={onPlayPause}
             onSpeedChange={setSpeed}
             onLoopToggle={() => setLoop((l) => !l)}
           />
@@ -159,11 +221,9 @@ export default function PlayClient({ play, category }: PlayClientProps) {
 
   // ─── Normal mode ──────────────────────────────────────────────────
   return (
-    // pb-16 md:pb-0 keeps content above the fixed mobile bottom nav
     <div className="flex flex-col pb-16 md:pb-0" style={{ height: "100dvh" }}>
-      {/* ── Header — compact on mobile ── */}
+      {/* ── Header ── */}
       <div className="shrink-0 px-3 pt-3 pb-2 border-b border-gray-800/60">
-        {/* Row 1: category + action buttons */}
         <div className="flex items-center justify-between gap-2 mb-1">
           <span
             className={`text-[10px] font-bold uppercase tracking-widest ${category?.color ?? "text-gray-400"}`}
@@ -186,12 +246,10 @@ export default function PlayClient({ play, category }: PlayClientProps) {
           </div>
         </div>
 
-        {/* Row 2: play name */}
         <h1 className="text-lg md:text-2xl font-black text-white leading-tight">
           {play.name}
         </h1>
 
-        {/* Row 3: description — collapsible on mobile */}
         <div className="mt-1">
           <p
             className={`text-gray-400 text-xs md:text-sm leading-snug ${descExpanded ? "" : "line-clamp-1 md:line-clamp-none"}`}
@@ -207,13 +265,13 @@ export default function PlayClient({ play, category }: PlayClientProps) {
         </div>
       </div>
 
-      {/* ── Court — flex-1, takes all remaining space ── */}
-      {/* absolute inset-0 child ensures reliable height propagation to SVG */}
+      {/* ── Court ── */}
       <div className="flex-1 min-h-0 relative bg-gray-950">
         <div className="absolute inset-0 p-2 flex items-center justify-center">
           <PlayAnimation
             play={play}
             stepIndex={stepIndex}
+            progress={progress}
             showGhosts
             roster={roster}
           />
@@ -225,22 +283,22 @@ export default function PlayClient({ play, category }: PlayClientProps) {
         <PlayControls
           play={play}
           stepIndex={stepIndex}
+          totalProgress={totalProgress}
           isPlaying={isPlaying}
           speed={speed}
           loop={loop}
           onPrev={goPrev}
           onNext={goNext}
-          onPlayPause={() => setIsPlaying((p) => !p)}
+          onPlayPause={onPlayPause}
           onSpeedChange={setSpeed}
           onLoopToggle={() => setLoop((l) => !l)}
           onCoachingMode={() => setCoachingMode(true)}
         />
       </div>
 
-      {/* ── Related plays — desktop only, mobile behind toggle ── */}
+      {/* ── Related ── */}
       {relatedPlays.length > 0 && (
         <div className="shrink-0 border-t border-gray-800/60">
-          {/* Mobile: collapsible toggle */}
           <button
             onClick={() => setRelatedOpen((v) => !v)}
             className="md:hidden w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-widest"
@@ -248,8 +306,6 @@ export default function PlayClient({ play, category }: PlayClientProps) {
             <span>More in {category?.label}</span>
             <span>{relatedOpen ? "▲" : "▼"}</span>
           </button>
-
-          {/* Desktop: always visible; Mobile: only when open */}
           <div
             className={`px-3 pb-3 ${relatedOpen ? "block" : "hidden"} md:block`}
           >
