@@ -100,15 +100,15 @@ export default function PlayControls({
 
   // Normal mobile-first layout
   return (
-    <div className="flex flex-col gap-2 px-3 py-3 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800">
-      {/* Step description — compact, 2 lines max on mobile */}
-      <p className="text-gray-200 leading-snug font-medium text-xs md:text-sm line-clamp-2">
+    <div className="flex flex-col gap-1.5 px-3 py-2 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800">
+      {/* Step description — compact, 2 lines max */}
+      <p className="text-gray-200 leading-snug font-medium text-[12px] md:text-sm line-clamp-2 min-h-[2lh]">
         {play.steps[stepIndex].description}
       </p>
 
       {/* Progress bar + step counter inline */}
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+        <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -124,14 +124,14 @@ export default function PlayControls({
         <button
           onClick={onPrev}
           disabled={stepIndex === 0}
-          className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 transition-all active:scale-95"
+          className="flex-1 py-2 rounded-xl font-bold text-sm bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 transition-all active:scale-95"
         >
           ← Prev
         </button>
 
         <button
           onClick={onPlayPause}
-          className="flex-[1.4] py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all active:scale-95"
+          className="flex-[1.4] py-2 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white transition-all active:scale-95"
         >
           {isPlaying ? "⏸ Pause" : "▶ Play"}
         </button>
@@ -139,7 +139,7 @@ export default function PlayControls({
         <button
           onClick={onNext}
           disabled={stepIndex === total - 1}
-          className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 transition-all active:scale-95"
+          className="flex-1 py-2 rounded-xl font-bold text-sm bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 transition-all active:scale-95"
         >
           Next →
         </button>
@@ -161,7 +161,7 @@ export default function PlayControls({
         <button
           onClick={onLoopToggle}
           title="Loop"
-          className={`w-10 py-2.5 rounded-xl font-bold text-sm shrink-0 transition-all ${loop ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"}`}
+          className={`w-10 py-2 rounded-xl font-bold text-sm shrink-0 transition-all ${loop ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"}`}
         >
           ↺
         </button>

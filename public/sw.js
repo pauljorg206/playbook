@@ -1,4 +1,4 @@
-const CACHE = "playbook-v1";
+const CACHE = "playbook-v2";
 const PRECACHE = [
   "/",
   "/plays/offense/one-four-high",
@@ -29,8 +29,33 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+// Network-first for HTML/page navigations so the playbook always shows the latest plays.
+// Cache-first for static assets so the app still loads offline at the gym.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+
+  const isPage =
+    e.request.mode === "navigate" ||
+    e.request.headers.get("accept")?.includes("text/html");
+
+  if (isPage) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, clone));
+          return res;
+        })
+        .catch(() =>
+          caches.match(e.request).then((cached) => cached || caches.match("/")),
+        ),
+    );
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;

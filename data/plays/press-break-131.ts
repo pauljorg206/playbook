@@ -16,7 +16,7 @@ const play: Play = {
         {
           id: "p1",
           x: 50,
-          y: 97,
+          y: 99,
           label: "1",
           role: "inbounder",
           hasBall: true,
@@ -40,7 +40,7 @@ const play: Play = {
         {
           id: "p1",
           x: 50,
-          y: 97,
+          y: 99,
           label: "1",
           role: "inbounder",
           hasBall: true,
@@ -79,7 +79,7 @@ const play: Play = {
       description:
         "Middle attack! Player 2 passes to 4 in the middle — the gap nobody is guarding. Player 4 catches in space with room to dribble. Player 3 sprints up the far sideline. Player 5 flashes toward the ball.",
       players: [
-        { id: "p1", x: 50, y: 97, label: "1", role: "inbounder" },
+        { id: "p1", x: 50, y: 99, label: "1", role: "inbounder" },
         { id: "p2", x: 12, y: 82, label: "2", role: "offense", hasBall: true },
         { id: "p3", x: 88, y: 75, label: "3", role: "offense" },
         { id: "p4", x: 30, y: 78, label: "4", role: "offense" },

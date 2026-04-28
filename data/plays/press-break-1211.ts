@@ -16,7 +16,7 @@ const play: Play = {
         {
           id: "p1",
           x: 50,
-          y: 97,
+          y: 99,
           label: "1",
           role: "inbounder",
           hasBall: true,
@@ -40,7 +40,7 @@ const play: Play = {
         {
           id: "p1",
           x: 50,
-          y: 97,
+          y: 99,
           label: "1",
           role: "inbounder",
           hasBall: true,
