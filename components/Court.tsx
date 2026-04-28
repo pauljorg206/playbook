@@ -1,46 +1,50 @@
 "use client";
 
-// Half-court SVG. viewBox 0 0 500 470. Scale: 1 ft ≈ 10 px.
-// Coordinate system: y=0 is top (half-court line), y=470 is baseline.
-// Coordinates 0–100 (% of width / height) map via (x/100)*500, (y/100)*470.
+// Half-court SVG. viewBox 0 0 500 470 (+ OOB pad). Scale: 1 ft ≈ 10 px.
+// HS varsity geometry (NFHS):
+//   Court: 50 ft × 47 ft (half).
+//   Basket center 5 ft from baseline (y=410).
+//   Backboard 4 ft from baseline (y=420).
+//   FT line 19 ft from baseline (y=270).
+//   Lane 12 ft wide (x=190..310), 19 ft deep.
+//   3-pt arc 19'9" radius (197 px).
+// Player coordinates: 0–100 percent of (500 × 470).
 
 export const COURT_WIDTH = 500;
 export const COURT_HEIGHT = 470;
-// Extra viewBox space below baseline for the OOB area (inbounders, ball-side baseline).
+// Extra viewBox space below baseline so inbounders (y≈99) render fully.
 const OOB_PAD = 22;
 
-// HS varsity geometry (NFHS):
-// - Court is 50 ft wide × 47 ft (half).
-// - Basket center is 5'3" from baseline (~52 px) — we use 50 px for clean numbers.
-// - Backboard is 4 ft from baseline (40 px).
-// - Free-throw line is 19 ft from baseline (190 px).
-// - Lane is 12 ft wide (120 px).
-// - 3-pt arc radius is 19'9" (≈ 197 px).
-// - Restricted area is 4 ft from basket (40 px).
+// Geometry constants — exported for plays / animation
+export const BASELINE_Y = 460;
+export const BASKET = { x: 250, y: 410 };
+export const BACKBOARD_Y = 420;
+export const FT_LINE_Y = 270;
+export const PAINT_LEFT = 190;
+export const PAINT_RIGHT = 310;
+export const FT_CIRCLE_R = 60;
+export const THREE_RADIUS = 197; // HS 19'9"
+export const RESTRICTED_R = 40;
+export const HOOP_R = 12;
 
-const BASELINE_Y = 460; // inner edge of court boundary
-const BASKET_X = 250;
-const BASKET_Y = 410; // 5 ft from baseline
-const BACKBOARD_Y = 420; // 4 ft from baseline
-const FT_LINE_Y = 270; // 19 ft from baseline
-const LANE_LEFT = 190;
-const LANE_RIGHT = 310;
-const FT_CIRCLE_R = 60; // 6 ft
-const HOOP_R = 12;
-const THREE_PT_R = 197; // 19'9"
-const RESTRICTED_R = 40; // 4 ft
+// 3-pt line: corner straights from baseline up to where the arc has a
+// vertical tangent (basket-y), then arc over the top. This gives a clean,
+// recognizable basketball-court look while keeping the HS 19'9" radius.
+export const CORNER_3_X_LEFT = BASKET.x - THREE_RADIUS; // 53
+export const CORNER_3_X_RIGHT = BASKET.x + THREE_RADIUS; // 447
+export const CORNER_3_TOP_Y = BASKET.y; // arc tangent is vertical here
+
+// Color tokens
+const LINE = "#e8d4a4";
+const LINE_DIM = "#a78b56";
+const PAINT_FILL = "#0e2d1a";
+const PAINT_FILL_DEEP = "#082015";
+const RIM = "#ff6b1a";
+const FLOOR_GRAIN = "#2a1709";
 
 export function coordToSvg(x: number, y: number) {
   return { cx: (x / 100) * COURT_WIDTH, cy: (y / 100) * COURT_HEIGHT };
 }
-
-// Compute where the 3-pt arc intersects the baseline so we can draw a clean arc.
-// (BASKET_X ± dx, BASELINE_Y) where dx = sqrt(R² − (BASELINE_Y − BASKET_Y)²)
-const THREE_PT_DX = Math.sqrt(
-  THREE_PT_R * THREE_PT_R - (BASELINE_Y - BASKET_Y) * (BASELINE_Y - BASKET_Y),
-);
-const THREE_PT_LEFT_X = BASKET_X - THREE_PT_DX;
-const THREE_PT_RIGHT_X = BASKET_X + THREE_PT_DX;
 
 export default function Court({ children }: { children?: React.ReactNode }) {
   return (
@@ -51,36 +55,59 @@ export default function Court({ children }: { children?: React.ReactNode }) {
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id="hardwood" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#241509" />
-          <stop offset="50%" stopColor="#1c1108" />
-          <stop offset="100%" stopColor="#241509" />
+          <stop offset="50%" stopColor="#1d1108" />
+          <stop offset="100%" stopColor="#170d06" />
         </linearGradient>
+        <linearGradient id="paintGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={PAINT_FILL} />
+          <stop offset="100%" stopColor={PAINT_FILL_DEEP} />
+        </linearGradient>
+        <radialGradient id="rimGlow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor={RIM} stopOpacity="0.45" />
+          <stop offset="60%" stopColor={RIM} stopOpacity="0.08" />
+          <stop offset="100%" stopColor={RIM} stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="vignette" cx="0.5" cy="0.55" r="0.7">
+          <stop offset="60%" stopColor="#000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0.35" />
+        </radialGradient>
       </defs>
 
-      {/* Court surface — extends into OOB strip below the baseline so inbounders fit */}
+      {/* Court surface — extends into OOB strip below baseline */}
       <rect
         x={0}
         y={0}
         width={COURT_WIDTH}
         height={COURT_HEIGHT + OOB_PAD}
-        fill="url(#hardwood)"
-        rx={8}
+        fill="url(#floorGrad)"
+        rx={10}
       />
 
-      {/* Hardwood grain */}
-      {Array.from({ length: 14 }).map((_, i) => (
+      {/* Hardwood grain — finer plank lines */}
+      {Array.from({ length: 19 }).map((_, i) => (
         <line
           key={i}
           x1={0}
-          y1={(i + 1) * 32}
+          y1={(i + 1) * 24}
           x2={COURT_WIDTH}
-          y2={(i + 1) * 32}
-          stroke="#0e0805"
+          y2={(i + 1) * 24}
+          stroke={FLOOR_GRAIN}
           strokeWidth={1}
-          opacity={0.7}
+          opacity={0.55}
         />
       ))}
+
+      {/* Vignette over the playable area */}
+      <rect
+        x={0}
+        y={0}
+        width={COURT_WIDTH}
+        height={COURT_HEIGHT}
+        fill="url(#vignette)"
+        pointerEvents="none"
+      />
 
       {/* Court boundary (sidelines + baseline) */}
       <rect
@@ -89,168 +116,200 @@ export default function Court({ children }: { children?: React.ReactNode }) {
         width={COURT_WIDTH - 20}
         height={BASELINE_Y - 10}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={2.5}
         rx={2}
       />
 
-      {/* Half-court line */}
+      {/* Half-court line (top edge) */}
       <line
         x1={10}
         y1={10}
         x2={COURT_WIDTH - 10}
         y2={10}
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={2.5}
       />
 
-      {/* Half-circle at top (center circle, half visible) */}
+      {/* Center-circle half (top) */}
       <path
-        d={`M ${BASKET_X - 60} 10 A 60 60 0 0 0 ${BASKET_X + 60} 10`}
+        d={`M ${BASKET.x - 60} 10 A 60 60 0 0 0 ${BASKET.x + 60} 10`}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE_DIM}
         strokeWidth={2}
         strokeDasharray="6 4"
       />
 
-      {/* 3-point line — HS pure arc, with short straight segments to the baseline */}
+      {/* 3-pt line — corner straights + arc */}
       <line
-        x1={THREE_PT_LEFT_X}
+        x1={CORNER_3_X_LEFT}
         y1={BASELINE_Y}
-        x2={THREE_PT_LEFT_X}
-        y2={BASELINE_Y}
-        stroke="#e6c98a"
+        x2={CORNER_3_X_LEFT}
+        y2={CORNER_3_TOP_Y}
+        stroke={LINE}
+        strokeWidth={2}
+      />
+      <line
+        x1={CORNER_3_X_RIGHT}
+        y1={BASELINE_Y}
+        x2={CORNER_3_X_RIGHT}
+        y2={CORNER_3_TOP_Y}
+        stroke={LINE}
         strokeWidth={2}
       />
       <path
-        d={`M ${THREE_PT_LEFT_X} ${BASELINE_Y} A ${THREE_PT_R} ${THREE_PT_R} 0 0 1 ${THREE_PT_RIGHT_X} ${BASELINE_Y}`}
+        d={`M ${CORNER_3_X_LEFT} ${CORNER_3_TOP_Y} A ${THREE_RADIUS} ${THREE_RADIUS} 0 0 1 ${CORNER_3_X_RIGHT} ${CORNER_3_TOP_Y}`}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={2}
       />
 
-      {/* Lane / Paint */}
+      {/* Painted lane */}
       <rect
-        x={LANE_LEFT}
+        x={PAINT_LEFT}
         y={FT_LINE_Y}
-        width={LANE_RIGHT - LANE_LEFT}
+        width={PAINT_RIGHT - PAINT_LEFT}
         height={BASELINE_Y - FT_LINE_Y}
-        fill="#0d2918"
-        stroke="#e6c98a"
+        fill="url(#paintGrad)"
+        stroke={LINE}
         strokeWidth={2}
       />
 
       {/* Free-throw line */}
       <line
-        x1={LANE_LEFT}
+        x1={PAINT_LEFT}
         y1={FT_LINE_Y}
-        x2={LANE_RIGHT}
+        x2={PAINT_RIGHT}
         y2={FT_LINE_Y}
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={2}
       />
 
-      {/* Free-throw circle (top half solid, bottom half dashed) */}
+      {/* Free-throw circle: top half dashed, bottom half solid */}
       <path
-        d={`M ${LANE_LEFT} ${FT_LINE_Y} A ${FT_CIRCLE_R} ${FT_CIRCLE_R} 0 0 1 ${LANE_RIGHT} ${FT_LINE_Y}`}
+        d={`M ${PAINT_LEFT} ${FT_LINE_Y} A ${FT_CIRCLE_R} ${FT_CIRCLE_R} 0 0 1 ${PAINT_RIGHT} ${FT_LINE_Y}`}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={2}
       />
       <path
-        d={`M ${LANE_LEFT} ${FT_LINE_Y} A ${FT_CIRCLE_R} ${FT_CIRCLE_R} 0 0 0 ${LANE_RIGHT} ${FT_LINE_Y}`}
+        d={`M ${PAINT_LEFT} ${FT_LINE_Y} A ${FT_CIRCLE_R} ${FT_CIRCLE_R} 0 0 0 ${PAINT_RIGHT} ${FT_LINE_Y}`}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE}
         strokeWidth={1.5}
         strokeDasharray="5 4"
       />
 
-      {/* Lane block marks (NFHS spacing) */}
-      {/* First low block: 7 ft from baseline (y = 390) */}
-      {/* Then 11 ft (y = 350), 14 ft (y = 320), 17 ft (y = 290) */}
+      {/* Lane hash marks (NFHS spacing): low block 7 ft, then 11/14/17 ft */}
       {[
-        { y: BASELINE_Y - 70, w: 6 },
-        { y: BASELINE_Y - 110, w: 4 },
-        { y: BASELINE_Y - 140, w: 4 },
-        { y: BASELINE_Y - 170, w: 4 },
-      ].map((block, i) => (
+        { y: BASELINE_Y - 70, w: 8, sw: 3 }, // first block — heavier
+        { y: BASELINE_Y - 110, w: 6, sw: 2 },
+        { y: BASELINE_Y - 140, w: 6, sw: 2 },
+        { y: BASELINE_Y - 170, w: 6, sw: 2 },
+      ].map((m, i) => (
         <g key={i}>
           <line
-            x1={LANE_LEFT - block.w}
-            y1={block.y}
-            x2={LANE_LEFT}
-            y2={block.y}
-            stroke="#e6c98a"
-            strokeWidth={2}
+            x1={PAINT_LEFT - m.w}
+            y1={m.y}
+            x2={PAINT_LEFT}
+            y2={m.y}
+            stroke={LINE}
+            strokeWidth={m.sw}
           />
           <line
-            x1={LANE_RIGHT}
-            y1={block.y}
-            x2={LANE_RIGHT + block.w}
-            y2={block.y}
-            stroke="#e6c98a"
-            strokeWidth={2}
+            x1={PAINT_RIGHT}
+            y1={m.y}
+            x2={PAINT_RIGHT + m.w}
+            y2={m.y}
+            stroke={LINE}
+            strokeWidth={m.sw}
           />
         </g>
       ))}
-
-      {/* Tick marks indicating low-block positions on the lane */}
+      {/* Inside-lane low-block notches */}
       <line
-        x1={LANE_LEFT}
-        y1={BASELINE_Y - 70}
-        x2={LANE_LEFT + 8}
-        y2={BASELINE_Y - 70}
-        stroke="#e6c98a"
+        x1={PAINT_LEFT}
+        y1={BASELINE_Y - 72}
+        x2={PAINT_LEFT}
+        y2={BASELINE_Y - 68}
+        stroke={LINE}
         strokeWidth={2}
       />
       <line
-        x1={LANE_RIGHT - 8}
-        y1={BASELINE_Y - 70}
-        x2={LANE_RIGHT}
-        y2={BASELINE_Y - 70}
-        stroke="#e6c98a"
+        x1={PAINT_RIGHT}
+        y1={BASELINE_Y - 72}
+        x2={PAINT_RIGHT}
+        y2={BASELINE_Y - 68}
+        stroke={LINE}
         strokeWidth={2}
       />
 
-      {/* Restricted-area arc (in front of basket) */}
+      {/* Restricted-area arc (4 ft from basket) */}
       <path
-        d={`M ${BASKET_X - RESTRICTED_R} ${BASKET_Y} A ${RESTRICTED_R} ${RESTRICTED_R} 0 0 1 ${BASKET_X + RESTRICTED_R} ${BASKET_Y}`}
+        d={`M ${BASKET.x - RESTRICTED_R} ${BASKET.y} A ${RESTRICTED_R} ${RESTRICTED_R} 0 0 1 ${BASKET.x + RESTRICTED_R} ${BASKET.y}`}
         fill="none"
-        stroke="#e6c98a"
+        stroke={LINE_DIM}
         strokeWidth={1.5}
         strokeDasharray="4 3"
       />
 
+      {/* Rim glow */}
+      <circle
+        cx={BASKET.x}
+        cy={BASKET.y}
+        r={42}
+        fill="url(#rimGlow)"
+        pointerEvents="none"
+      />
+
       {/* Backboard */}
       <line
-        x1={BASKET_X - 30}
+        x1={BASKET.x - 30}
         y1={BACKBOARD_Y}
-        x2={BASKET_X + 30}
+        x2={BASKET.x + 30}
         y2={BACKBOARD_Y}
-        stroke="#e6c98a"
-        strokeWidth={3}
+        stroke={LINE}
+        strokeWidth={3.5}
         strokeLinecap="round"
       />
-      {/* Stanchion / connector to hoop */}
+      {/* Stanchion */}
       <line
-        x1={BASKET_X}
+        x1={BASKET.x}
         y1={BACKBOARD_Y}
-        x2={BASKET_X}
-        y2={BASKET_Y - HOOP_R}
-        stroke="#a07a3f"
+        x2={BASKET.x}
+        y2={BASKET.y - HOOP_R}
+        stroke={LINE_DIM}
         strokeWidth={1.5}
       />
 
       {/* Hoop */}
       <circle
-        cx={BASKET_X}
-        cy={BASKET_Y}
+        cx={BASKET.x}
+        cy={BASKET.y}
         r={HOOP_R}
         fill="none"
-        stroke="#ea5a1a"
+        stroke={RIM}
         strokeWidth={2.5}
       />
-      <circle cx={BASKET_X} cy={BASKET_Y} r={2.5} fill="#ea5a1a" />
+      {/* Net suggestion */}
+      <line
+        x1={BASKET.x - 7}
+        y1={BASKET.y + 4}
+        x2={BASKET.x + 7}
+        y2={BASKET.y + 4}
+        stroke={RIM}
+        strokeWidth={1}
+        opacity={0.55}
+      />
+      <line
+        x1={BASKET.x - 5}
+        y1={BASKET.y + 7}
+        x2={BASKET.x + 5}
+        y2={BASKET.y + 7}
+        stroke={RIM}
+        strokeWidth={1}
+        opacity={0.4}
+      />
 
       {children}
     </svg>
